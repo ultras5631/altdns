@@ -140,6 +140,15 @@ def join_words_subdomains(args, alteration_words):
                         write_domain(args, wp, full_url)
                         current_sub[index] = original_sub
 
+# adds suffix word to each generated string
+def suffix_words(args, suffix_wordlist):
+    with open(args.output, 'r') as readfile:
+        with open(args.output+'_suffix', 'w') as outfile:
+            for word in suffix_wordlist:
+                for lines in readfile:
+                    suffix_lines = lines.rstrip('\n') + word + '\n'
+                    outfile.writelines(suffix_lines)
+
 
 def get_cname(q, target, resolved_out):
     global progress
@@ -267,6 +276,9 @@ def main():
                         action="store_true")
     parser.add_argument("-d", "--dnsserver",
                         help="IP address of resolver to use (overrides system default)", required=False)
+    parser.add_argument("-sx", "--suffix",
+                        help="List of words to alter the subdomains with",
+                        required=False, default="suffix.txt")
 
     parser.add_argument(
         "-s",
@@ -304,6 +316,10 @@ def main():
     if args.add_number_suffix is True:
       insert_number_suffix_subdomains(args, alteration_words)
     join_words_subdomains(args, alteration_words)
+
+    if args.suffix:
+        suffix_wordlist = get_alteration_words(args.suffix)
+        suffix_words(args, suffix_wordlist)
 
     threadhandler = []
 
